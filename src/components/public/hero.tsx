@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {
   motion,
   useMotionTemplate,
@@ -13,6 +14,13 @@ import {
 } from "framer-motion";
 import { ArrowRight, ScanLine, ShieldCheck, Zap } from "lucide-react";
 import { PhoneMockup } from "@/components/public/phone-mockup";
+
+/* Scene 3D dimuat terpisah (three.js tidak masuk bundle awal).
+   Selama chunk dimuat / WebGL gagal → mockup statis tampil. */
+const HeroScene = dynamic(
+  () => import("@/components/public/hero-scene").then((m) => m.HeroScene),
+  { ssr: false, loading: () => <PhoneMockup /> },
+);
 
 const pillars = [
   { icon: ShieldCheck, label: "Jujur" },
@@ -125,15 +133,11 @@ export function Hero() {
               Lacak Status Servis
             </Link>
           </div>
-
-          <p className="mt-6 hidden text-xs text-zinc-600 sm:block">
-            Gerakkan kursor ke ponsel di samping → begitulah pelanggan kami pantau servisnya.
-          </p>
         </motion.div>
 
-        {/* Ponsel interaktif */}
-        <motion.div style={layer({ opacity })} className="hidden md:block">
-          <PhoneMockup />
+        {/* HP 3D interaktif — tampil di semua perangkat, stack di mobile */}
+        <motion.div style={layer({ opacity })}>
+          <HeroScene />
         </motion.div>
       </div>
     </section>
